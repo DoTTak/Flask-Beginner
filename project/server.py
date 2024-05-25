@@ -5,6 +5,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "Random: " + "<strong>" + str(random.random()) + "</strong>"
+    random_color = "#%06x" % random.randint(0, 0xFFFFFF)
+    return "Random: " + \
+        "<strong style='color: "+random_color+";'>" + \
+            str(random.random()) + \
+        "</strong>"
 
 app.run(port=8000, debug=True)
