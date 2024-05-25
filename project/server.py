@@ -4,6 +4,7 @@ import random
 
 app = Flask(__name__)
 
+nextId = 4 # 다음에 추가될 아이템 번호
 list_items = [ # 아이템을 저장하기 위한 목록
     {"id": 1, "title": "html", "content": "html is ..."},
     {"id": 2, "title": "javascript", "content": "javascript is ..."},
@@ -74,8 +75,16 @@ def create():
     
     # POST 요청을 수행하는 로직
     else:
+        global nextId # 지역변수로 인식되지 않기 위함
         title = request.form['title'] # 클라이언트로 부터 HTTP Request 데이터 'title' 을 받음
         content = request.form['content'] # 클라이언트로 부터 HTTP Request 데이터 'content' 을 받음
+        # 새로운 아이템 생성
+        new_item = {"id": nextId, "title": title, "content": content}
+        # 목록에 새로운 아이템을 삽입
+        list_items.append(new_item)
+        # 다음 아이템을 위한 아이템 번호 증가시키기
+        nextId = nextId + 1
+
         return title + ", " + content
 
 app.run(port=8000, debug=True)
