@@ -20,6 +20,7 @@ def template(contents, content):
         <ol>
             {contents}
         </ol>
+        <button type="botton" onclick="location.href='/create'">create</button>
         {content}
     </body>
     </html>
@@ -43,7 +44,7 @@ def index():
 @app.route('/read/<int:id>')
 def read(id):
     # 아이템을 조회되는 화면
-    
+
     # 선택한 아이템에 대한 제목과 콘텐츠를 담기 위한 구현부
     title = '' # 제목을 저장할 변수
     content = '' # 콘텐츠를 저장할 변수
@@ -53,8 +54,16 @@ def read(id):
             title = item["title"]
             content = item["content"]
             break
-    
-    return template(getItems(), f"""<hr><h2>Title: {title}</h2>{content}""")
+
+    # 수정, 삭제 버튼
+    menu = f"""
+    <p>
+    <button type="botton" onclick="location.href='/edit/{id}'">edit</button>
+    <button type="botton" onclick="location.href='/delete/{id}'">delete</button>
+    </p>
+    """
+
+    return template(getItems(), f"""<hr><h2>Title: {title}</h2>{menu}{content}""")
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
@@ -72,7 +81,7 @@ def create():
         </form>
         """
         return template(getItems(), f"<hr>{html}")
-    
+
     # POST 요청을 수행하는 로직
     else:
         global nextId # 지역변수로 인식되지 않기 위함
@@ -88,5 +97,49 @@ def create():
         nextId = nextId + 1
 
         return redirect("/read/" + str(now_id))
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit(id):
+
+    if request.method == 'GET':
+        # 선택된 아이템을 조회
+        now_item = {}
+        for item in list_items:
+            if id == item['id']:
+                now_item = item
+                break
+
+        # 아이템 수정을 위한 html 코드
+        html = f"""
+        <h2>Edit</h2>
+        <form action="/edit/{now_item['id']}" method="POST">
+            <p>title: <input type="text" name="title" placeholder="title" value="{now_item['title']}"></input></p>
+            <p><textarea name="content" placeholder="content" >{now_item['content']}</textarea></p>
+            <input type="submit" value="edit">
+        </form>
+        """
+        return template(getItems(), f"<hr>{html}")
+    else:
+        # 일치하는 아이템의 경우 제목과 콘텐츠를 변경
+        for item in list_items:
+            if id == item['id']:
+                item['title'] = request.form['title']
+                item['content'] = request.form['content']
+                break
+        # 수정 완료 시 수정된 아이템의 정보로 이동
+        return redirect(f"/read/{id}")
+
+@app.route('/delete/<int:id>')
+def delete(id):
+
+    # 일치하는 id 값이 있을 경우 목록에서 제거
+    for item in list_items:
+        if id == item['id']:
+            list_items.remove(item)
+            break
+
+    # 삭제 시 조회 페이지로 이동
+    return redirect("/")
+
 
 app.run(port=8000, debug=True)
