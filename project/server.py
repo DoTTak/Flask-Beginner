@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request
+from flask import request, redirect
 import random
 
 app = Flask(__name__)
@@ -82,9 +82,11 @@ def create():
         new_item = {"id": nextId, "title": title, "content": content}
         # 목록에 새로운 아이템을 삽입
         list_items.append(new_item)
+        # 생성한 아이템의 번호 저장
+        now_id = nextId
         # 다음 아이템을 위한 아이템 번호 증가시키기
         nextId = nextId + 1
 
-        return title + ", " + content
+        return redirect("/read/" + str(now_id))
 
 app.run(port=8000, debug=True)
